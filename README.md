@@ -1,5 +1,8 @@
 # 🍔 Flutter Food Ordering App
 
+## 🚀 Live Demo
+👉 [https://fooddeliveryapp-ca9f5.web.app](https://fooddeliveryapp-ca9f5.web.app)
+
 A modern and elegant **Food Ordering Application** built using **Flutter**, **Firebase**, and **Cloudinary** for seamless image uploads.  
 Users can browse, order, and pay for food with wallet integration — while admins can manage menus and orders in real-time.
 
