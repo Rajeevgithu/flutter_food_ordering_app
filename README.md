@@ -1,16 +1,43 @@
-# e_commerce_app
+# 🍔 Flutter Food Ordering App
 
-A new Flutter project.
+A modern and elegant **Food Ordering Application** built using **Flutter**, **Firebase**, and **Cloudinary** for seamless image uploads.  
+Users can browse, order, and pay for food with wallet integration — while admins can manage menus and orders in real-time.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🚀 Features
 
-A few resources to get you started if this is your first Flutter project:
+### 👤 User
+- 🔐 Login / Signup with Firebase Authentication  
+- 🍕 Browse food items and view details  
+- 🛒 Add / Remove from cart  
+- 💳 Wallet balance management  
+- 📸 Upload and update profile picture (via Cloudinary)  
+- ✅ Checkout with total calculation  
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### 🛠 Admin
+- 👨‍💼 Admin login  
+- ➕ Add / Edit / Delete food items  
+- 📊 View and manage orders  
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## 🧰 Tech Stack
+
+| Component | Technology |
+|------------|-------------|
+| Frontend | Flutter (Dart) |
+| Backend | Firebase Firestore |
+| Authentication | Firebase Auth |
+| Image Storage | Cloudinary |
+| Local Storage | SharedPreferences |
+| Environment Config | flutter_dotenv |
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/<your-username>/flutter_food_ordering_app.git
+cd flutter_food_ordering_app
