@@ -1,0 +1,73 @@
+# Flutter & Dart
+.dart_tool/
+.packages
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+generated_plugin_registrant.dart
+
+# IntelliJ / Android Studio / VSCode
+.idea/
+.vscode/
+*.iml
+
+# Android
+android/.gradle/
+android/app/debug.keystore
+android/local.properties
+android/key.properties
+android/app/google-services.json
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Runner/GeneratedPluginRegistrant.*
+ios/Runner.xcworkspace/
+ios/Runner.xcodeproj/project.xcworkspace/
+ios/Runner.xcodeproj/xcuserdata/
+ios/Runner.xcworkspace/xcuserdata/
+
+# macOS
+macos/Flutter/ephemeral/
+macos/Pods/
+macos/.symlinks/
+macos/Runner/GeneratedPluginRegistrant.*
+
+# Windows & Linux builds
+windows/flutter/ephemeral/
+linux/flutter/ephemeral/
+
+# Web build output
+web/.dart_tool/
+web/build/
+
+# Firebase files
+# (keep firebase_options.dart if you use FlutterFire CLI)
+**/google-services.json
+**/GoogleService-Info.plist
+
+# Environment & Secrets
+.env
+.env.*
+*.key
+*.pem
+*.p12
+
+# Logs & Temp
+*.log
+*.tmp
+*.lock
+*.bak
+*.swp
+
+# Test / Coverage
+coverage/
+test_outputs/
+
+# Misc
+pubspec.lock
+.DS_Store
+Thumbs.db
