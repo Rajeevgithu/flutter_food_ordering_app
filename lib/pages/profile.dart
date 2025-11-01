@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:e_commerce_app/service/auth.dart';
 import 'package:e_commerce_app/service/shared_pref.dart';
-import 'package:e_commerce_app/service/cloudinary_service.dart'; // ✅ Use Cloudinary
+import 'package:e_commerce_app/service/cloudinary_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -32,6 +32,19 @@ class _ProfileState extends State<Profile> {
     name = await SharedPreferenceHelper().getUserName();
     email = await SharedPreferenceHelper().getUserEmail();
     userId = await SharedPreferenceHelper().getUserId();
+
+    // If profile is null, try to fetch from Firestore (for first-time login)
+    if (profile == null || profile!.isEmpty) {
+      final doc = await FirebaseFirestore.instance
+          .collection("user")
+          .doc(userId)
+          .get();
+      if (doc.exists && doc.data()!["Profile"] != null) {
+        profile = doc["Profile"];
+        await SharedPreferenceHelper().saveUserProfile(profile!);
+      }
+    }
+
     setState(() => _isLoading = false);
   }
 
@@ -44,16 +57,17 @@ class _ProfileState extends State<Profile> {
     setState(() => _isUploading = true);
 
     try {
-      // ✅ Upload image to Cloudinary
       final imageUrl = await CloudinaryService.uploadImage(selectedImage!);
 
-      // ✅ Save to Firestore (user collection, singular)
+      if (imageUrl == null) throw Exception("Cloudinary returned null URL");
+
+      // ✅ Save to Firestore
       await FirebaseFirestore.instance.collection("user").doc(userId).update({
         "Profile": imageUrl,
       });
 
       // ✅ Update SharedPreferences
-      await SharedPreferenceHelper().saveUserProfile(imageUrl!);
+      await SharedPreferenceHelper().saveUserProfile(imageUrl);
 
       setState(() {
         profile = imageUrl;
@@ -130,12 +144,8 @@ class _ProfileState extends State<Profile> {
 
       if (confirm != true) return;
 
-      // ✅ Delete from Firestore (user collection)
       await FirebaseFirestore.instance.collection("user").doc(userId).delete();
-
-      // ✅ Delete from Firebase Auth
       await AuthMethods().deleteUser();
-
       await SharedPreferenceHelper().clearAll();
 
       if (!mounted) return;
@@ -189,10 +199,10 @@ class _ProfileState extends State<Profile> {
                     child: Material(
                       elevation: 10.0,
                       borderRadius: BorderRadius.circular(60),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(60),
-                        child: GestureDetector(
-                          onTap: _getImage,
+                      child: GestureDetector(
+                        onTap: _getImage,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(60),
                           child: _isUploading
                               ? const SizedBox(
                                   height: 120,
@@ -208,11 +218,15 @@ class _ProfileState extends State<Profile> {
                                         width: 120,
                                         fit: BoxFit.cover,
                                       )
-                                    : Image.asset(
-                                        "images/boy.jpg",
+                                    : Container(
                                         height: 120,
                                         width: 120,
-                                        fit: BoxFit.cover,
+                                        color: Colors.grey.shade300,
+                                        child: const Icon(
+                                          Icons.camera_alt,
+                                          size: 50,
+                                          color: Colors.black54,
+                                        ),
                                       )),
                         ),
                       ),

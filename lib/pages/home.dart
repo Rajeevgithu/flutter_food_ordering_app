@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_commerce_app/pages/details.dart';
 import 'package:e_commerce_app/service/database.dart';
+import 'package:e_commerce_app/service/shared_pref.dart';
 import 'package:e_commerce_app/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 
@@ -28,7 +29,28 @@ class _HomeState extends State<Home> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Hello Rajeev,", style: AppWidget.boldTextFeildStyle()),
+                  FutureBuilder<String?>(
+                    future: SharedPreferenceHelper().getUserName(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Text(
+                          "Hello...",
+                          style: AppWidget.boldTextFeildStyle(),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Text(
+                          "Hello User",
+                          style: AppWidget.boldTextFeildStyle(),
+                        );
+                      } else {
+                        final name = snapshot.data ?? "User";
+                        return Text(
+                          "Hello $name,",
+                          style: AppWidget.boldTextFeildStyle(),
+                        );
+                      }
+                    },
+                  ),
                   Container(
                     margin: const EdgeInsets.only(right: 20),
                     padding: const EdgeInsets.all(3),
@@ -40,6 +62,7 @@ class _HomeState extends State<Home> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 30),
               Text("Delicious Food", style: AppWidget.HeadlineTextFeildStyle()),
               Text(
