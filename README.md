@@ -39,5 +39,5 @@ Users can browse, order, and pay for food with wallet integration — while admi
 
 ### 1️⃣ Clone the repository
 ```bash
-git clone https://github.com/<your-username>/flutter_food_ordering_app.git
+git clone https://github.com/Rajeevgithu/flutter_food_ordering_app.git
 cd flutter_food_ordering_app
