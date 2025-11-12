@@ -27,7 +27,6 @@ class _OnboardState extends State<Onboard> {
     super.dispose();
   }
 
-  // ✅ Save onboarding completion state
   Future<void> _completeOnboarding(BuildContext context) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -54,7 +53,6 @@ class _OnboardState extends State<Onboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        // ✅ Gradient background for more modern look
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFFFCEEEA), Color(0xFFFFFFFF)],
@@ -64,7 +62,6 @@ class _OnboardState extends State<Onboard> {
         ),
         child: Column(
           children: [
-            // ✅ PageView for onboarding slides
             Expanded(
               child: PageView.builder(
                 controller: _controller,
@@ -84,12 +81,17 @@ class _OnboardState extends State<Onboard> {
                     ),
                     child: Column(
                       children: [
-                        Image.asset(
-                          content.image,
-                          height: 400,
-                          width: double.infinity,
-                          fit: BoxFit.contain,
+                        // 🖼️ Image wrapped in ClipRRect for rounded corners
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(100), // ADDED BORDER RADIUS TO IMAGE
+                          child: Image.asset(
+                            content.image,
+                            height: 350,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
                         ),
+
                         const SizedBox(height: 40.0),
                         Text(
                           content.title,
@@ -114,7 +116,7 @@ class _OnboardState extends State<Onboard> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 contents.length,
-                (index) => buildDot(index),
+                    (index) => buildDot(index),
               ),
             ),
 
@@ -139,7 +141,8 @@ class _OnboardState extends State<Onboard> {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: const Color(0xFFE53935),
-                  borderRadius: BorderRadius.circular(15),
+                  // 🎯 UPDATED: Made the border radius more circular/pill-shaped
+                  borderRadius: BorderRadius.circular(50),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.red.withOpacity(0.3),

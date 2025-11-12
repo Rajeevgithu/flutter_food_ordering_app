@@ -278,19 +278,41 @@ class _LogInState extends State<LogIn> {
                         ),
                       ),
 
-                      SizedBox(height: 40.0),
+                      SizedBox(height: 30.0),
 
                       // 🔸 Signup link
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => SignUp()),
-                          );
-                        },
-                        child: Text(
-                          "Don't have an account? Sign up",
-                          style: AppWidget.semiBoldTextFeildStyle(),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => SignUp()),
+                            );
+                          },
+                          child: RichText(
+
+                              text: TextSpan(
+                                children: [
+                                TextSpan(
+                                text: "Don't have an account? ",
+                                style: AppWidget.semiBoldTextFeildStyle().copyWith(
+                                  // 🎯 Setting the base text color to black
+                                  color: Colors.black,
+                                ),
+                              ),
+                              TextSpan(
+                                text: "Sign up",
+                                style: AppWidget.semiBoldTextFeildStyle().copyWith(
+                                  // 🍊 Setting the 'Sign up' text color to orange
+                                  color: const Color(0Xffff5722),
+
+                            ),
+                              )
+
+                            ],
+                          ),
+                        ),
                         ),
                       ),
                     ],

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+    This color resource defines the hex value for 'blue'
+    referenced in your styles.xml file for the CustomEditText text color.
+    Using a vibrant, accessible blue color (a common primary blue: #007AFF).
+    -->
+    <color name="blue">#FF007AFF</color>
+</resources>

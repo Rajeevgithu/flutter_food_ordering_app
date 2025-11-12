@@ -18,6 +18,8 @@ class Details extends StatefulWidget {
 }
 
 class _DetailsState extends State<Details> {
+  final Color _themeOrange = const Color(0xFFff5c30); // Theme color
+
   int quantity = 1;
   double total = 0.0;
   String? userId;
@@ -51,6 +53,7 @@ class _DetailsState extends State<Details> {
       return;
     }
 
+    // Ensure price is parsed correctly before use
     final priceValue =
         double.tryParse(widget.price.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
 
@@ -69,16 +72,14 @@ class _DetailsState extends State<Details> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          backgroundColor: Colors.orangeAccent,
+          backgroundColor: _themeOrange, // Use theme color for success
           content: const Text("✅ Added to cart successfully!"),
           action: SnackBarAction(
             label: "🛒 View Cart",
             textColor: Colors.white,
             onPressed: () {
-              Navigator.pushNamed(
-                context,
-                '/Order',
-              ); // ✅ navigate to your cart page
+              // Navigate to the Order/Cart page
+              Navigator.pushNamed(context, '/Order');
             },
           ),
           behavior: SnackBarBehavior.floating,
@@ -97,14 +98,15 @@ class _DetailsState extends State<Details> {
 
   @override
   Widget build(BuildContext context) {
+    // Recalculate price value for display
     final double priceValue =
         double.tryParse(widget.price.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0;
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey[50], // Lighter background
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 1,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           onPressed: () => Navigator.pop(context),
@@ -123,14 +125,14 @@ class _DetailsState extends State<Details> {
           children: [
             // 🖼️ Product Image
             Container(
-              height: 260,
+              height: 280, // Slightly taller image
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20), // More rounded
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 10,
-                    offset: const Offset(0, 6),
+                    color: Colors.black.withOpacity(0.15), // Darker shadow for depth
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
                   ),
                 ],
               ),
@@ -140,61 +142,58 @@ class _DetailsState extends State<Details> {
                 fit: BoxFit.cover,
                 width: double.infinity,
                 errorBuilder: (context, error, stackTrace) =>
-                    const Center(child: Icon(Icons.broken_image, size: 80)),
+                    Center(child: Icon(Icons.broken_image, size: 80, color: Colors.grey)),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 25),
 
             // 🏷️ Product Info
             Text(
               widget.name,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+              style: AppWidget.HeadlineTextFeildStyle().copyWith(fontSize: 26, color: Colors.black),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
               widget.detail,
-              style: const TextStyle(fontSize: 15, color: Colors.black54),
+              style: AppWidget.LightTextFeildStyle().copyWith(fontSize: 16, color: Colors.black87),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 25),
 
-            // 💰 Price Section
+            // 💰 Price & Quantity Section
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(15),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // Price Column
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Price",
-                        style: TextStyle(fontSize: 16, color: Colors.black54),
+                      Text(
+                        "Unit Price",
+                        style: AppWidget.LightTextFeildStyle().copyWith(fontSize: 15, color: Colors.grey[600]),
                       ),
                       Text(
                         "₹${priceValue.toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange,
+                        style: AppWidget.boldTextFeildStyle().copyWith(
+                          fontSize: 24,
+                          color: _themeOrange, // Themed Price Color
                         ),
                       ),
                     ],
                   ),
+                  // Quantity Buttons
                   Row(
                     children: [
                       _buildQuantityButton(Icons.remove, () {
@@ -206,13 +205,10 @@ class _DetailsState extends State<Details> {
                         }
                       }),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           "$quantity",
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: AppWidget.semiBoldTextFeildStyle().copyWith(fontSize: 20),
                         ),
                       ),
                       _buildQuantityButton(Icons.add, () {
@@ -232,14 +228,14 @@ class _DetailsState extends State<Details> {
             // 🧾 Summary Section
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(15),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 8,
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
                 ],
@@ -247,47 +243,49 @@ class _DetailsState extends State<Details> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "Order Summary",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: AppWidget.semiBoldTextFeildStyle().copyWith(fontSize: 18),
                   ),
-                  const SizedBox(height: 10),
-                  _buildSummaryRow("1️⃣ Product Type", widget.name),
-                  _buildSummaryRow("📦 Quantity", "$quantity pcs"),
-                  _buildSummaryRow("⏰ Delivery Time", "30 mins"),
-                  const Divider(thickness: 1, color: Colors.black12),
+                  const SizedBox(height: 12),
+                  _buildSummaryRow("Product", widget.name),
+                  _buildSummaryRow("Quantity", "$quantity pcs"),
+                  _buildSummaryRow("Delivery Time", "30 mins"),
+                  const Divider(thickness: 1.5, height: 25, color: Colors.grey),
                   _buildSummaryRow(
-                    "💰 Total",
+                    "Grand Total",
                     "₹${total.toStringAsFixed(2)}",
                     isBold: true,
+                    color: _themeOrange, // Themed Total Color
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 35),
 
+            // 🛒 Add to Cart Button
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: _addToCart, // ✅ simplified
+                    onPressed: _addToCart,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      backgroundColor: _themeOrange, // Themed Button Color
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(15), // Consistent rounding
                       ),
+                      elevation: 5,
                     ),
                     icon: const Icon(
-                      Icons.shopping_cart_outlined,
+                      Icons.add_shopping_cart, // Updated icon for visual appeal
                       color: Colors.white,
                     ),
-                    label: const Text(
+                    label: Text(
                       "Add to Cart",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                      style: AppWidget.boldTextFeildStyle().copyWith(
+                        fontSize: 18,
                         color: Colors.white,
                       ),
                     ),
@@ -295,29 +293,31 @@ class _DetailsState extends State<Details> {
                 ),
               ],
             ),
+            const SizedBox(height: 10),
           ],
         ),
       ),
     );
   }
 
-  // 🔹 Quantity Button Widget
+  // 🔹 Quantity Button Widget (Themed)
   Widget _buildQuantityButton(IconData icon, VoidCallback onPressed) {
     return InkWell(
       onTap: onPressed,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(8),
+          color: _themeOrange.withOpacity(0.1), // Light orange background
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: _themeOrange.withOpacity(0.5)),
         ),
-        padding: const EdgeInsets.all(6),
-        child: Icon(icon, color: Colors.black),
+        padding: const EdgeInsets.all(8),
+        child: Icon(icon, color: _themeOrange, size: 22), // Themed icon color
       ),
     );
   }
 
-  // 🔹 Summary Row Widget
-  Widget _buildSummaryRow(String label, String value, {bool isBold = false}) {
+  // 🔹 Summary Row Widget (Themed)
+  Widget _buildSummaryRow(String label, String value, {bool isBold = false, Color? color}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
@@ -325,13 +325,14 @@ class _DetailsState extends State<Details> {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 15, color: Colors.black54),
+            style: AppWidget.semiBoldTextFeildStyle().copyWith(fontSize: 15, color: Colors.black87),
           ),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            style: AppWidget.semiBoldTextFeildStyle().copyWith(
+              fontSize: 16,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+              color: color ?? Colors.black,
             ),
           ),
         ],
