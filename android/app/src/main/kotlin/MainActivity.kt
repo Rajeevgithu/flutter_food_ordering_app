@@ -1,8 +1,8 @@
 package com.example.e_commerce_app
 
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity // Change 1: Import the Fragment Activity
 
-class MainActivity: FlutterActivity() {
-    // This is the correct, default content for MainActivity.kt.
-    // You can leave this class empty.
+class MainActivity: FlutterFragmentActivity() { // Change 2: Use FlutterFragmentActivity
+    // No code change required inside the class body.
+    // Stripe requires this base class for proper initialization.
 }

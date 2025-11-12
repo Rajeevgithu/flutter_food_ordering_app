@@ -20,12 +20,25 @@ Future<void> main() async {
   // Load environment variables
   await dotenv.load(fileName: ".env");
 
-  // 1. Set the Publishable Key (static property - REQUIRED)
-  Stripe.publishableKey = dotenv.env['STRIPE_PUBLISHABLE_KEY']!;
+  // --- FIX START ---
+  // Safely retrieve the publishable key and check for null
+  final stripeKey = dotenv.env['STRIPE_PUBLISHABLE_KEY'];
 
-  // 2. Initialize the Stripe instance (using the 'instance' getter)
-  // FIX: Renamed 'init' to 'initialize'. This method is optional if you don't need
-  // to set the merchantIdentifier or returnUrl.
+  if (stripeKey == null || stripeKey.isEmpty) {
+    // Print a clear, custom error message to the console instead of crashing
+    // This helps in debugging deployment issues where the .env file might be missing.
+    print('FATAL CONFIGURATION ERROR: STRIPE_PUBLISHABLE_KEY not found in .env file.');
+    // You might want to halt the app or display a user-friendly error screen here
+    // if payment processing is essential, but for now, we prevent the crash.
+  } else {
+    // 1. Set the Publishable Key (static property - REQUIRED)
+    Stripe.publishableKey = stripeKey;
+    // 2. Initialize the Stripe instance (optional, often not needed for web)
+    // Stripe.instance.initialize(
+    //   publishableKey: stripeKey,
+    // );
+  }
+  // --- FIX END ---
 
   // Initialize Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -45,7 +58,7 @@ Future<void> main() async {
   } else if (role == 'user') {
     initialScreen = const BottomNav();
   } else {
-    initialScreen = const Onboard(); // Default to login
+    initialScreen = const Onboard(); // Default to onboard screen
   }
 
   runApp(MyApp(initialScreen: initialScreen));
@@ -78,6 +91,7 @@ class MyApp extends StatelessWidget {
 
         // User Routes
         '/Order': (context) => const Order(),
+        '/SignUp': (context) => const SignUp(),
       },
     );
   }

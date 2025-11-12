@@ -1,11 +1,13 @@
 import 'dart:async';
+import 'dart:convert'; // Required for JSON encoding/decoding
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 // ⚠️ IMPORTANT: Assuming you use the flutter_stripe package for payment
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:e_commerce_app/service/database.dart';
 import 'package:e_commerce_app/service/shared_pref.dart';
-import 'package:e_commerce_app/widget/widget_support.dart'; // Assuming this holds styling utilities
+import 'package:e_commerce_app/widget/widget_support.dart';
+import 'package:http/http.dart' as http; // Required for API calls
 
 class Wallet extends StatefulWidget {
   const Wallet({super.key});
@@ -23,16 +25,19 @@ class _WalletState extends State<Wallet> {
   bool _isLoading = true;
   final TextEditingController amountController = TextEditingController();
 
+  // Load Secret Key from .env once
+  final String _stripeSecretKey = dotenv.env['STRIPE_SECRET_KEY'] ?? '';
+
   @override
   void initState() {
     super.initState();
     _loadUserData();
-    // Stripe initialization should ideally be in main.dart,
-    // but configuring the publishable key here is necessary for Stripe methods.
+    // Stripe initialization (using Publishable Key)
     Stripe.publishableKey = dotenv.env['STRIPE_PUBLISHABLE_KEY']!;
   }
 
   Future<void> _loadUserData() async {
+    // ... (omitted for brevity, remains the same)
     try {
       id = await SharedPreferenceHelper().getUserId();
       wallet = await SharedPreferenceHelper().getUserWallet();
@@ -48,9 +53,49 @@ class _WalletState extends State<Wallet> {
   }
 
   Future<void> _refreshWallet() async {
+    // ... (omitted for brevity, remains the same)
     wallet = await SharedPreferenceHelper().getUserWallet();
     currentWalletBalance = int.tryParse(wallet ?? "0");
     if (mounted) setState(() {});
+  }
+
+  // ==============================
+  // 🔒 Internal "Backend" Simulation
+  // WARNING: In a production app, this entire function
+  // MUST run on a secure server, NOT in Flutter code.
+  // ==============================
+  Future<String> _createPaymentIntent(int amountInRupees) async {
+    if (_stripeSecretKey.isEmpty) {
+      throw Exception("Stripe Secret Key not found. Check .env and main.dart.");
+    }
+
+    // Stripe requires amount in the smallest currency unit (paise/cents)
+    final amountInPaise = amountInRupees * 100;
+
+    final response = await http.post(
+      Uri.parse('https://api.stripe.com/v1/payment_intents'),
+      headers: {
+        // This is where the SECRET key is used. Keep it hidden!
+        'Authorization': 'Bearer $_stripeSecretKey',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: {
+        'amount': amountInPaise.toString(),
+        'currency': 'inr',
+        'payment_method_types[]': 'card',
+        'description': 'E-commerce wallet top-up',
+      },
+    );
+
+    final responseBody = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      return responseBody['client_secret'];
+    } else {
+      final errorMessage = responseBody['error']['message'] ?? 'Unknown Stripe API error';
+      debugPrint('Stripe API Error: ${response.statusCode} - $errorMessage');
+      throw Exception('Failed to create Payment Intent: $errorMessage');
+    }
   }
 
   // ==============================
@@ -58,49 +103,38 @@ class _WalletState extends State<Wallet> {
   // ==============================
   Future<void> makeStripePayment(String amountStr) async {
     final int amount = int.tryParse(amountStr) ?? 0;
-    if (amount <= 0) {
+    if (amount <= 0 || id == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter a valid amount.")),
+        const SnackBar(content: Text("Invalid amount or user data missing.")),
       );
       return;
     }
 
-    // 1. Convert to cents (Stripe requires amount in the smallest currency unit)
-    final int amountInCents = amount * 100;
-
-    // 2. Mock Backend Call (In a real app, this creates a Payment Intent on your server)
-    // For this demonstration, we are mocking a Payment Intent ID and Client Secret
-    final String clientSecret = "YOUR_MOCK_CLIENT_SECRET"; // Replace with actual logic
-
-    // In a real application, you would make an HTTP request here:
-    /* try {
-      final response = await http.post(
-        Uri.parse('YOUR_BACKEND_URL/create-payment-intent'),
-        body: {'amount': amountInCents.toString(), 'currency': 'INR'},
-      );
-      final jsonResponse = jsonDecode(response.body);
-      clientSecret = jsonResponse['clientSecret'];
-    } catch (e) {
-      // Handle error
-    }
-    */
+    String? clientSecret;
 
     try {
-      // 3. Initialize Payment Sheet
+      // 1. Create Payment Intent using the internal, simulated backend function
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Initiating payment... Please wait.")),
+      );
+
+      clientSecret = await _createPaymentIntent(amount);
+
+      // 2. Initialize Payment Sheet
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: clientSecret, // Must be fetched from backend
+          paymentIntentClientSecret: clientSecret,
           merchantDisplayName: 'Food Delivery App',
-          customerId: id, // Optional, but good practice
+          customerId: id,
           customFlow: false,
-          style: ThemeMode.light, // Match your app theme
+          style: ThemeMode.light,
         ),
       );
 
-      // 4. Display Payment Sheet
+      // 3. Display Payment Sheet
       await Stripe.instance.presentPaymentSheet();
 
-      // 5. Success! Update Wallet Balance
+      // 4. Payment successful! Update Wallet Balance
       if (!mounted) return;
 
       final int newBalance = currentWalletBalance! + amount;
@@ -110,35 +144,33 @@ class _WalletState extends State<Wallet> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("✅ ₹$amount added successfully!"),
+          content: Text("✅ ₹$amount added successfully! Wallet updated!"),
           backgroundColor: Colors.green,
         ),
       );
 
+    } on StripeException catch (e) {
+      debugPrint("Stripe Payment Error: ${e.error.localizedMessage}");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Payment Failed: ${e.error.localizedMessage}"),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
     } catch (e) {
-      if (e is StripeException) {
-        debugPrint("Stripe Error: ${e.error.localizedMessage}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Payment Failed: ${e.error.localizedMessage}"),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-      } else {
-        debugPrint("General Payment Error: $e");
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Payment failed! Please check your connection."),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-      }
+      debugPrint("General Payment Error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Payment failed! Check connection or keys: $e"),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
     }
   }
 
 
   // ==============================
-  // 🧾 Manual Amount Dialog
+  // 🧾 Manual Amount Dialog (omitted for brevity, remains the same)
   // ==============================
   Future openEdit() => showDialog(
     context: context,
@@ -220,7 +252,7 @@ class _WalletState extends State<Wallet> {
   );
 
   // ==============================
-  // 💳 Wallet Card Widget
+  // 💳 Wallet Card Widget (omitted for brevity, remains the same)
   // ==============================
   Widget _buildWalletCard() {
     return Container(
@@ -282,7 +314,7 @@ class _WalletState extends State<Wallet> {
   }
 
   // ==============================
-  // 💰 Quick Add Button
+  // 💰 Quick Add Button (omitted for brevity, remains the same)
   // ==============================
   Widget _amountBox(String amount) {
     return GestureDetector(
